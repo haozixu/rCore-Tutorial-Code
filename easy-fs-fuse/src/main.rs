@@ -95,10 +95,10 @@ fn efs_test() -> std::io::Result<()> {
             .write(true)
             .create(true)
             .open("target/fs.img")?;
-        f.set_len(8192 * 512).unwrap();
+        f.set_len(65536 * 512).unwrap();
         f
     })));
-    EasyFileSystem::create(block_file.clone(), 4096, 1);
+    EasyFileSystem::create(block_file.clone(), 65536, 1);
     let efs = EasyFileSystem::open(block_file.clone());
     let root_inode = EasyFileSystem::root_inode(&efs);
     root_inode.create("filea");
@@ -146,6 +146,11 @@ fn efs_test() -> std::io::Result<()> {
     random_str_test(400 * BLOCK_SZ);
     random_str_test(1000 * BLOCK_SZ);
     random_str_test(2000 * BLOCK_SZ);
+
+    // extra test for indirect3: more than 27 + 128 + 128*128 = 16539 blocks
+    random_str_test(17000 * BLOCK_SZ);
+    random_str_test(25000 * BLOCK_SZ + BLOCK_SZ / 9);
+    random_str_test(40000 * BLOCK_SZ);
 
     Ok(())
 }
