@@ -11,6 +11,7 @@ use crate::sync::UPSafeCell;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use bitflags::*;
+use core::any::Any;
 use easy_fs::{EasyFileSystem, Inode};
 use lazy_static::*;
 /// A wrapper around a filesystem inode
@@ -49,6 +50,10 @@ impl OSInode {
             v.extend_from_slice(&buffer[..len]);
         }
         v
+    }
+    /// Clone inner inode
+    pub fn clone_inner_inode(&self) -> Arc<Inode> {
+        self.inner.exclusive_access().inode.clone()
     }
 }
 
@@ -150,5 +155,8 @@ impl File for OSInode {
             total_write_size += write_size;
         }
         total_write_size
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

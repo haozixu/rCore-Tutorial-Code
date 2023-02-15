@@ -83,6 +83,11 @@ impl MemorySet {
         }
         self.areas.push(map_area);
     }
+    /// Map an area manually. Note that this area is not recorded.
+    pub fn map(&mut self, vpn: VirtPageNum, ppn: PhysPageNum, perm: MapPermission) {
+        let pte_flags = PTEFlags::from_bits(perm.bits()).unwrap();
+        self.page_table.map(vpn, ppn, pte_flags);
+    }
     /// Mention that trampoline is not collected by areas.
     fn map_trampoline(&mut self) {
         self.page_table.map(

@@ -183,4 +183,8 @@ impl Inode {
         });
         block_cache_sync_all();
     }
+    /// Get file size
+    pub fn get_size(&self) -> usize {
+        self.read_disk_inode(|disk_inode: &DiskInode| disk_inode.size) as usize
+    }
 }

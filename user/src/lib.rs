@@ -112,3 +112,6 @@ pub fn sleep(period_ms: usize) {
         sys_yield();
     }
 }
+pub fn mmap(fd: usize, len: usize, offset: usize) -> isize {
+    sys_mmap(fd, len, offset)
+}

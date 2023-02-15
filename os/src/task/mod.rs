@@ -102,6 +102,10 @@ pub fn exit_current_and_run_next(exit_code: i32) {
     inner.children.clear();
     // deallocate user space
     inner.memory_set.recycle_data_pages();
+    // write back dirty pages
+    for mapping in inner.file_mappings.iter() {
+        mapping.sync();
+    } 
     drop(inner);
     // **** release current PCB
     // drop task manually to maintain rc correctly

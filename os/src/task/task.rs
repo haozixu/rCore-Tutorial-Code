@@ -5,6 +5,7 @@ use crate::config::TRAP_CONTEXT;
 use crate::fs::{File, Stdin, Stdout};
 use crate::mm::{MemorySet, PhysPageNum, VirtAddr, KERNEL_SPACE};
 use crate::sync::UPSafeCell;
+use crate::syscall::mmap::{FileMapping, VirtualAddressAllocator, MMAP_AREA_BASE};
 use crate::trap::{trap_handler, TrapContext};
 use alloc::sync::{Arc, Weak};
 use alloc::vec;
@@ -29,6 +30,8 @@ pub struct TaskControlBlockInner {
     pub children: Vec<Arc<TaskControlBlock>>,
     pub exit_code: i32,
     pub fd_table: Vec<Option<Arc<dyn File + Send + Sync>>>,
+    pub mmap_va_allocator: VirtualAddressAllocator,
+    pub file_mappings: Vec<FileMapping>,
 }
 
 impl TaskControlBlockInner {
@@ -90,6 +93,8 @@ impl TaskControlBlock {
                         // 2 -> stderr
                         Some(Arc::new(Stdout)),
                     ],
+                    mmap_va_allocator: VirtualAddressAllocator::new(MMAP_AREA_BASE),
+                    file_mappings: Vec::new(),
                 })
             },
         };
@@ -165,6 +170,8 @@ impl TaskControlBlock {
                     children: Vec::new(),
                     exit_code: 0,
                     fd_table: new_fd_table,
+                    mmap_va_allocator: VirtualAddressAllocator::new(MMAP_AREA_BASE),
+                    file_mappings: Vec::new(), // for simplicity, do not copy mappings
                 })
             },
         });
